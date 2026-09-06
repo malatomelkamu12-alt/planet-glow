@@ -167,7 +167,7 @@ function EarthSurface({
         <SphereGeometry args={[r * 1.012, 64, 64]} />
         <MeshStandardMaterial map={clouds} transparent opacity={0.32} depthWrite={false} />
       </Mesh>
-      <Atmosphere radius={r * 1.07} color="#4da6ff" />
+      <Atmosphere radius={r * 1.03} color="#4da6ff" strength={0.2} />
     </Group>
   );
 }
@@ -175,14 +175,13 @@ function EarthSurface({
 /* ---------------- Atmospheric Fresnel shell ---------------- */
 
 /**
- * Thin atmospheric shell. Physically this is a few-km haze layer, so it stays
- * faint (strength <= 0.12 by default) and only brightens where sunlight
- * actually grazes the limb — no neon outline on the night side.
+ * Thin atmospheric shell. The high Fresnel exponent and tight radius keep the
+ * haze on the limb instead of reading as an oversized circle around the body.
  */
 function Atmosphere({
   radius,
   color,
-  strength = 0.1,
+  strength = 0.18,
   sunDir,
 }: {
   radius: number;
@@ -233,7 +232,7 @@ function Atmosphere({
           varying vec3 vNormalW;
           void main() {
             // Tight limb falloff: high exponent keeps the haze hugging the edge.
-            float rim = pow(clamp(1.0 - abs(dot(vNormalV, vec3(0.0, 0.0, 1.0))), 0.0, 1.0), 6.0);
+            float rim = pow(clamp(1.0 - abs(dot(vNormalV, vec3(0.0, 0.0, 1.0))), 0.0, 1.0), 7.0);
             float sun = mix(1.0, clamp(dot(normalize(vNormalW), normalize(sunDir)) * 0.5 + 0.5, 0.0, 1.0), useSun);
             float a = rim * strength * sun;
             gl_FragColor = vec4(glowColor * a, a);
@@ -328,8 +327,11 @@ function GasGiantSurface({
         <SphereGeometry args={[info.radius, 128, 128]} />
         <ShaderMaterial vertexShader={gasVert} fragmentShader={gasFrag} uniforms={uniforms} />
       </Mesh>
-      <Atmosphere radius={info.radius * 1.035} color={info.accent} />
-      <Atmosphere radius={info.radius * 1.11} color={info.accent} />
+      <Atmosphere
+        radius={info.radius * 1.03}
+        color={info.accent}
+        strength={id === "Neptune" ? 0.22 : id === "Uranus" ? 0.2 : 0.16}
+      />
     </Group>
   );
 }
@@ -518,7 +520,13 @@ function TexturedBody({ id, heat, terminator }: { id: BodyId; heat: number; term
           color={terminator < 0.5 ? "#ffffff" : "#e8eef7"}
         />
       </Mesh>
-      {(id === "Venus") && <Atmosphere radius={info.radius * 1.06} color={info.accent} />}
+      {(id === "Venus" || id === "Mars") && (
+        <Atmosphere
+          radius={info.radius * 1.03}
+          color={info.accent}
+          strength={id === "Venus" ? 0.2 : 0.15}
+        />
+      )}
     </Group>
   );
 }
@@ -794,8 +802,9 @@ function CameraRig({
   positions: React.RefObject<Record<string, THREE.Vector3>>;
   controls: React.RefObject<{ target: THREE.Vector3; update: () => void } | null>;
 }) {
-  const { camera } = useThree();
-  const distTarget = useRef<number | null>(BODIES[body].radius * 3.4);
+  const { camera, size } = useThree();
+  const isMobile = size.width < 768;
+  const distTarget = useRef<number | null>(BODIES[body].radius * (isMobile ? 4.2 : 3.4));
   const recenter = useRef(true);
   const focusPoint = useRef(new THREE.Vector3());
   const tmp = useRef(new THREE.Vector3());
@@ -803,10 +812,16 @@ function CameraRig({
 
   useEffect(() => {
     const r = BODIES[body].radius;
-    distTarget.current = rideAlong ? r * 1.55 : r * 3.4;
+    distTarget.current = rideAlong ? r * (isMobile ? 1.8 : 1.55) : r * (isMobile ? 4.2 : 3.4);
     recenter.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [body, rideAlong]);
+  }, [body, rideAlong, isMobile]);
+
+  useEffect(() => {
+    if (!(camera instanceof THREE.PerspectiveCamera)) return;
+    camera.fov = isMobile ? 52 : 45;
+    camera.updateProjectionMatrix();
+  }, [camera, isMobile]);
 
 
   // Floating +/- buttons: step the orbit distance and let the frame loop lerp there.

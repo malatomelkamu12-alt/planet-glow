@@ -250,7 +250,7 @@ export default function Dashboard() {
   const hud = `transition-opacity duration-300 ${zen ? "pointer-events-none opacity-0" : "opacity-100"}`;
   /** Below md the HUD panels dock as frosted bottom-sheets instead of side cards. */
   const panelBase = isMobile
-    ? "glass hud-scroll pointer-events-auto fixed inset-x-2 bottom-2 z-50 max-h-[65vh] overflow-y-auto p-4 transition-all duration-300 ease-in-out"
+    ? "glass hud-scroll pointer-events-auto fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-50 max-h-[65vh] overflow-y-auto p-4 transition-all duration-300 ease-in-out"
     : "glass hud-scroll pointer-events-auto w-full overflow-y-auto p-4 transition-all duration-300 ease-in-out max-h-[calc(100dvh-320px)]";
   const panelState = (open: boolean, side: "left" | "right") =>
     open
@@ -302,10 +302,10 @@ export default function Dashboard() {
       <div className="pointer-events-none absolute inset-0 grid-overlay" aria-hidden />
 
       {/* FLOATING COMMAND BAR */}
-      <header className={`pointer-events-none absolute inset-x-4 top-4 z-40 flex justify-center ${hud}`}>
+      <header className={`pointer-events-none absolute inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 flex justify-center sm:inset-x-4 ${hud}`}>
 
-        <div className="glass pointer-events-auto flex w-full max-w-[1600px] items-center gap-4 px-4 py-2.5">
-          <OrbitalBrandHeader />
+        <div className="glass pointer-events-auto grid w-full max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 py-2.5 sm:flex sm:gap-4 sm:px-4">
+          <OrbitalBrandHeader className="min-w-0 [&>span]:hidden sm:[&>span]:inline" />
 
           <nav
             aria-label="Celestial bodies"
@@ -331,7 +331,7 @@ export default function Dashboard() {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2 md:gap-3">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 md:gap-3">
             <div className="hidden flex-col items-end sm:flex">
               <span className="hud-eyebrow leading-none">Mission clock</span>
               <b className="mt-1 font-mono text-[12px] font-medium tracking-[0.12em] text-foreground">
@@ -392,14 +392,14 @@ export default function Dashboard() {
       </header>
 
       {/* DASHBOARD SUMMARY — slim collapsible status pill, expands into a floating popover */}
-      <div className={`pointer-events-none absolute inset-x-3 top-[74px] z-40 flex justify-center md:inset-x-4 md:top-[80px] ${hud}`}>
+      <div className={`pointer-events-none absolute inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+4.25rem)] z-40 flex justify-center md:inset-x-4 md:top-[80px] ${hud}`}>
         <StatusStrip issLive={iss?.source === "live"} onOpenView={(viewKey) => setIntelligence(viewKey)} />
       </div>
 
 
 
       {/* LEFT TELEMETRY CARD */}
-      <div className={`absolute left-3 top-[116px] z-30 flex w-[262px] max-w-[calc(100vw-1.5rem)] flex-col items-start gap-2 md:left-4 md:top-[124px] ${hud}`}>
+      <div className={`absolute left-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+9.75rem)] z-30 flex w-[262px] max-w-[calc(100vw-1.5rem)] flex-col items-start gap-2 md:left-4 md:top-[124px] ${hud}`}>
         <button
           onClick={() => {
             setTelemetryOpen((v) => !v);
@@ -522,7 +522,7 @@ export default function Dashboard() {
       </div>
 
       {/* RIGHT LAYERS + GAZETTEER CARD */}
-      <div className={`absolute right-3 top-[116px] z-30 flex w-[274px] max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 md:right-4 md:top-[124px] ${hud}`}>
+      <div className={`absolute right-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+9.75rem)] z-30 flex w-[274px] max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 md:right-4 md:top-[124px] ${hud}`}>
         <button
           onClick={() => {
             setLayersOpen((v) => !v);
@@ -642,7 +642,7 @@ export default function Dashboard() {
       {isCompact && !profileOpen && (
         <button
           onClick={() => setProfileOpen(true)}
-          className={`absolute bottom-24 left-3 z-30 flex items-center gap-2 rounded-full border border-white/[0.08] bg-[#090d16]/80 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground shadow-2xl backdrop-blur-xl transition-colors hover:border-gold/40 hover:text-gold ${hud}`}
+          className={`absolute bottom-[calc(max(1rem,env(safe-area-inset-bottom))+5rem)] left-3 z-30 flex items-center gap-2 rounded-full border border-white/[0.08] bg-[#090d16]/80 px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground shadow-2xl backdrop-blur-xl transition-colors hover:border-gold/40 hover:text-gold ${hud}`}
         >
           <Info size={13} className="text-gold" /> Specs
         </button>
@@ -656,7 +656,7 @@ export default function Dashboard() {
             transition={{ type: "spring", stiffness: 280, damping: 28 }}
             className={`z-30 rounded-xl border border-white/[0.08] bg-[#090d16]/80 p-4 shadow-2xl backdrop-blur-xl ${
               isCompact
-                ? "hud-scroll fixed inset-x-3 bottom-20 max-h-[55vh] overflow-y-auto"
+                ? "hud-scroll fixed inset-x-3 bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4rem)] max-h-[55vh] overflow-y-auto"
                 : "absolute bottom-24 left-6 w-80 max-w-[calc(100vw-3rem)]"
             } ${hud}`}
           >
@@ -799,7 +799,7 @@ export default function Dashboard() {
       )}
 
       {/* DEEP-SKY LAYER TOGGLES */}
-      <div className={`glass absolute bottom-[184px] right-4 z-30 flex flex-col p-1 md:bottom-[176px] ${hud}`}>
+      <div className={`glass absolute bottom-[calc(max(1rem,env(safe-area-inset-bottom))+10.5rem)] right-3 z-30 flex flex-col p-1 md:bottom-[176px] md:right-4 ${hud}`}>
         <button
           onClick={() => setStarLabels((v) => !v)}
           title="Star labels"
@@ -824,7 +824,7 @@ export default function Dashboard() {
       </div>
 
       {/* ZOOM PILL */}
-      <div className={`glass absolute bottom-28 right-4 z-30 flex flex-col p-1 md:bottom-24 ${hud}`}>
+      <div className={`glass absolute bottom-[calc(max(1rem,env(safe-area-inset-bottom))+6rem)] right-3 z-30 flex flex-col p-1 md:bottom-24 md:right-4 ${hud}`}>
         <button
           onClick={() => zoom(0.62)}
           aria-label="Zoom in"
@@ -843,7 +843,7 @@ export default function Dashboard() {
       </div>
 
       {/* BOTTOM TIME CONTROLLER */}
-      <footer className={`absolute inset-x-4 bottom-4 z-30 flex justify-center ${hud}`}>
+      <footer className={`absolute inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 flex justify-center sm:inset-x-4 ${hud}`}>
         <div className="glass flex w-full max-w-[860px] flex-wrap items-center gap-3 px-4 py-2.5">
           <button
             onClick={() => setPlaying((v) => !v)}
@@ -1002,7 +1002,7 @@ export default function Dashboard() {
       {/* MOBILE / TABLET BODY SELECTOR — touch scrollable */}
       <nav
         aria-label="Celestial bodies"
-        className={`hud-scroll absolute inset-x-3 top-[108px] z-30 flex items-center gap-1.5 overflow-x-auto pb-1 lg:hidden ${hud}`}
+        className={`hud-scroll absolute inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+6.75rem)] z-30 flex items-center gap-1.5 overflow-x-auto pb-1 lg:hidden ${hud}`}
       >
         <span className="glass flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.12em] text-muted-foreground">
           <Activity size={11} className="text-signal" /> {trackedCount.toLocaleString()}
