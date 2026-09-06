@@ -804,7 +804,7 @@ function CameraRig({
 }) {
   const { camera, size } = useThree();
   const isMobile = size.width < 768;
-  const distTarget = useRef<number | null>(BODIES[body].radius * (isMobile ? 4.2 : 3.4));
+  const distTarget = useRef<number | null>(BODIES[body].radius * (isMobile ? 4.8 : 3.4));
   const recenter = useRef(true);
   const focusPoint = useRef(new THREE.Vector3());
   const tmp = useRef(new THREE.Vector3());
@@ -812,7 +812,7 @@ function CameraRig({
 
   useEffect(() => {
     const r = BODIES[body].radius;
-    distTarget.current = rideAlong ? r * (isMobile ? 1.8 : 1.55) : r * (isMobile ? 4.2 : 3.4);
+    distTarget.current = rideAlong ? r * (isMobile ? 2 : 1.55) : r * (isMobile ? 4.8 : 3.4);
     recenter.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [body, rideAlong, isMobile]);
